@@ -8,10 +8,13 @@ import {
   TouchableOpacity,
   Animated,
 } from "react-native";
+import { NavigationContainer } from "@react-navigation/native";
+import { createStackNavigator } from "@react-navigation/stack";
+import Signup from "./signup"; // Import your Signup component
 
 const { width } = Dimensions.get("window");
 
-const OnboardingScreen = () => {
+const OnboardingScreen = ({ navigation }) => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const scrollViewRef = useRef(null);
   const fadeAnim = useRef(new Animated.Value(1)).current;
@@ -70,17 +73,20 @@ const OnboardingScreen = () => {
   }, [fadeAnim]);
 
   const handleNext = () => {
-    const nextIndex = (currentIndex + 1) % onboardingData.length;
-    setCurrentIndex(nextIndex);
-    scrollViewRef.current?.scrollTo({
-      x: nextIndex * width,
-      animated: true,
-    });
+    if (currentIndex === onboardingData.length - 1) {
+      navigation.navigate("Signup");
+    } else {
+      const nextIndex = (currentIndex + 1) % onboardingData.length;
+      setCurrentIndex(nextIndex);
+      scrollViewRef.current?.scrollTo({
+        x: nextIndex * width,
+        animated: true,
+      });
+    }
   };
 
   const SecurityIllustration = () => (
     <View style={styles.illustrationContainer}>
-      {/* Decorative dots */}
       <View
         style={[styles.dot, { backgroundColor: "#ff6b9d", top: 20, left: 30 }]}
       />
@@ -99,20 +105,14 @@ const OnboardingScreen = () => {
           { backgroundColor: "#10b981", bottom: 30, right: 50 },
         ]}
       />
-
-      {/* Shield background */}
       <View style={styles.shield} />
       <View style={styles.cape} />
-
-      {/* Bank vault/security icon */}
       <View style={styles.vaultContainer}>
         <View style={styles.vault} />
         <View style={styles.vaultDoor} />
         <View style={styles.vaultHandle} />
         <View style={styles.lockIcon} />
       </View>
-
-      {/* Security badges */}
       <View style={styles.securityBadge1} />
       <View style={styles.securityBadge2} />
     </View>
@@ -120,7 +120,6 @@ const OnboardingScreen = () => {
 
   const InvestmentIllustration = () => (
     <View style={styles.illustrationContainer}>
-      {/* Decorative dots */}
       <View
         style={[styles.dot, { backgroundColor: "#ff6b9d", top: 20, left: 30 }]}
       />
@@ -139,11 +138,7 @@ const OnboardingScreen = () => {
           { backgroundColor: "#10b981", bottom: 30, right: 50 },
         ]}
       />
-
-      {/* Background circle */}
       <View style={styles.investmentBg} />
-
-      {/* Chart/Graph */}
       <View style={styles.chartContainer}>
         <View style={styles.chartBar1} />
         <View style={styles.chartBar2} />
@@ -151,13 +146,9 @@ const OnboardingScreen = () => {
         <View style={styles.chartBar4} />
         <View style={styles.trendLine} />
       </View>
-
-      {/* Coins */}
       <View style={styles.coin1} />
       <View style={styles.coin2} />
       <View style={styles.coin3} />
-
-      {/* Dollar signs */}
       <Text style={styles.dollarSign1}>$</Text>
       <Text style={styles.dollarSign2}>$</Text>
     </View>
@@ -165,7 +156,6 @@ const OnboardingScreen = () => {
 
   const PaymentsIllustration = () => (
     <View style={styles.illustrationContainer}>
-      {/* Decorative dots */}
       <View
         style={[styles.dot, { backgroundColor: "#ff6b9d", top: 20, left: 30 }]}
       />
@@ -184,24 +174,14 @@ const OnboardingScreen = () => {
           { backgroundColor: "#10b981", bottom: 30, right: 50 },
         ]}
       />
-
-      {/* Background */}
       <View style={styles.paymentsBg} />
-
-      {/* Credit cards */}
       <View style={styles.creditCard1} />
       <View style={styles.creditCard2} />
-
-      {/* Mobile phone */}
       <View style={styles.phone} />
       <View style={styles.phoneScreen} />
-
-      {/* Payment symbols */}
       <View style={styles.paymentIcon1} />
       <View style={styles.paymentIcon2} />
       <View style={styles.paymentIcon3} />
-
-      {/* Transfer arrows */}
       <View style={styles.transferArrow1} />
       <View style={styles.transferArrow2} />
     </View>
@@ -243,7 +223,6 @@ const OnboardingScreen = () => {
               <View style={styles.illustrationWrapper}>
                 {renderIllustration(item.illustration)}
               </View>
-
               <View style={styles.textContainer}>
                 <Text style={styles.title}>
                   {item.title.split(" ").map((word, index) => (
@@ -265,8 +244,6 @@ const OnboardingScreen = () => {
           ))}
         </ScrollView>
       </Animated.View>
-
-      {/* Pagination dots */}
       <View style={styles.pagination}>
         {onboardingData.map((_, index) => (
           <View
@@ -278,8 +255,6 @@ const OnboardingScreen = () => {
           />
         ))}
       </View>
-
-      {/* Next button with circular border */}
       <View style={styles.buttonContainer}>
         <View style={styles.buttonOuterRing}>
           <TouchableOpacity style={styles.nextButton} onPress={handleNext}>
@@ -290,6 +265,7 @@ const OnboardingScreen = () => {
     </View>
   );
 };
+
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -305,13 +281,13 @@ const styles = StyleSheet.create({
     width,
     flex: 1,
     paddingHorizontal: 40,
-    paddingTop: 100, // Increased to push content down
-    paddingBottom: 100, // Slightly reduced for balance
+    paddingTop: 100,
+    paddingBottom: 100,
     alignItems: "center",
     justifyContent: "space-between",
   },
   illustrationWrapper: {
-    flex: 0.6, // Reduced flex to give more space to textContainer
+    flex: 0.6,
     justifyContent: "center",
     alignItems: "center",
   },
@@ -328,8 +304,6 @@ const styles = StyleSheet.create({
     height: 10,
     borderRadius: 5,
   },
-
-  // Security Illustration Styles
   shield: {
     width: 200,
     height: 220,
@@ -410,8 +384,6 @@ const styles = StyleSheet.create({
     backgroundColor: "#1e40af",
     borderRadius: 10,
   },
-
-  // Investment Illustration Styles
   investmentBg: {
     width: 200,
     height: 200,
@@ -512,8 +484,6 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     color: "#10b981",
   },
-
-  // Payments Illustration Styles
   paymentsBg: {
     width: 200,
     height: 200,
@@ -606,11 +576,10 @@ const styles = StyleSheet.create({
     backgroundColor: "#1e40af",
     transform: [{ rotate: "-30deg" }],
   },
-
   textContainer: {
     alignItems: "center",
     paddingHorizontal: 20,
-    marginTop: 20, // Added to create space between illustration and text
+    marginTop: 20,
   },
   title: {
     fontSize: 32,
@@ -628,14 +597,14 @@ const styles = StyleSheet.create({
     textAlign: "center",
     color: "#6b7280",
     lineHeight: 26,
-    marginBottom: 30, // Reduced to balance spacing
+    marginBottom: 30,
     fontWeight: "400",
   },
   pagination: {
     flexDirection: "row",
     justifyContent: "center",
     alignItems: "center",
-    paddingBottom: 20, // Reduced to bring pagination up slightly
+    paddingBottom: 20,
   },
   paginationDot: {
     width: 8,
@@ -650,7 +619,7 @@ const styles = StyleSheet.create({
   },
   buttonContainer: {
     alignItems: "center",
-    paddingBottom: 30, // Reduced to bring button up slightly
+    paddingBottom: 30,
   },
   buttonOuterRing: {
     width: 72,
@@ -705,4 +674,23 @@ const styles = StyleSheet.create({
   },
 });
 
-export default OnboardingScreen;
+const Stack = createStackNavigator();
+
+const App = () => (
+  <NavigationContainer>
+    <Stack.Navigator initialRouteName="Onboarding">
+      <Stack.Screen
+        name="Onboarding"
+        component={OnboardingScreen}
+        options={{ headerShown: false }}
+      />
+      <Stack.Screen
+        name="Signup"
+        component={Signup}
+        options={{ headerShown: false }}
+      />
+    </Stack.Navigator>
+  </NavigationContainer>
+);
+
+export default App;
