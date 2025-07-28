@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import {
   View,
   Text,
@@ -12,17 +12,40 @@ import {
   Alert,
 } from "react-native";
 
-const { width, height } = Dimensions.get("window");
+const { width } = Dimensions.get("window");
 
 const Login = ({ navigation }) => {
   const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [showPassword, setShowPassword] = useState(false);
+  const [pin, setPin] = useState(["", "", "", "", ""]); // 5-digit PIN
   const [isLoading, setIsLoading] = useState(false);
+  const pinRefs = useRef([]);
+
+  const handlePinChange = (value, index) => {
+    const newPin = [...pin];
+    newPin[index] = value;
+    setPin(newPin);
+
+    // Auto-focus next input
+    if (value && index < 4) {
+      pinRefs.current[index + 1]?.focus();
+    }
+  };
+
+  const handleKeyPress = (e, index) => {
+    if (e.nativeEvent.key === "Backspace" && index > 0 && !pin[index]) {
+      pinRefs.current[index - 1]?.focus();
+    }
+  };
 
   const handleLogin = async () => {
-    if (!email || !password) {
-      Alert.alert("Error", "Please fill in all fields");
+    if (!email) {
+      Alert.alert("Error", "Please enter your email");
+      return;
+    }
+
+    const pinString = pin.join("");
+    if (pinString.length !== 5) {
+      Alert.alert("Error", "Please enter a 5-digit PIN");
       return;
     }
 
@@ -31,16 +54,9 @@ const Login = ({ navigation }) => {
     setTimeout(() => {
       setIsLoading(false);
       Alert.alert("Success", "Login successful!");
-      // navigation.navigate('Dashboard');
+      // navigation.navigate("Dashboard"); // Uncomment if Dashboard screen exists
     }, 2000);
   };
-
-  const EyeIcon = ({ show }) => (
-    <View style={styles.eyeIcon}>
-      <View style={[styles.eyeOuter, !show && styles.eyeClosed]} />
-      {show && <View style={styles.eyeInner} />}
-    </View>
-  );
 
   const BankIcon = () => (
     <View style={styles.bankIconContainer}>
@@ -50,6 +66,25 @@ const Login = ({ navigation }) => {
       <View style={styles.bankPillar3} />
       <View style={styles.bankRoof} />
       <Text style={styles.bankText}>BANK</Text>
+    </View>
+  );
+
+  const renderPinInputs = () => (
+    <View style={styles.pinContainer}>
+      {pin.map((digit, index) => (
+        <TextInput
+          key={index}
+          ref={(ref) => (pinRefs.current[index] = ref)}
+          style={[styles.pinInput, digit && styles.pinInputFilled]}
+          value={digit}
+          onChangeText={(value) => handlePinChange(value, index)}
+          onKeyPress={(e) => handleKeyPress(e, index)}
+          keyboardType="numeric"
+          maxLength={1}
+          secureTextEntry
+          textAlign="center"
+        />
+      ))}
     </View>
   );
 
@@ -86,36 +121,20 @@ const Login = ({ navigation }) => {
             />
           </View>
 
-          {/* Password Input */}
+          {/* PIN Input */}
           <View style={styles.inputContainer}>
-            <Text style={styles.inputLabel}>Password</Text>
-            <View style={styles.passwordContainer}>
-              <TextInput
-                style={styles.passwordInput}
-                placeholder="Enter your password"
-                placeholderTextColor="#9ca3af"
-                value={password}
-                onChangeText={setPassword}
-                secureTextEntry={!showPassword}
-                autoCapitalize="none"
-                autoCorrect={false}
-              />
-              <TouchableOpacity
-                style={styles.eyeButton}
-                onPress={() => setShowPassword(!showPassword)}
-              >
-                <EyeIcon show={showPassword} />
-              </TouchableOpacity>
-            </View>
+            <Text style={styles.inputLabel}>PIN</Text>
+            <Text style={styles.pinSubtext}>Enter your 5-digit PIN</Text>
+            {renderPinInputs()}
           </View>
 
           {/* Forgot Password */}
-          <TouchableOpacity
+          {/* <TouchableOpacity
             style={styles.forgotPasswordContainer}
-            onPress={() => navigation?.navigate("ForgotPassword")}
+            onPress={() => navigation.navigate("ForgotPassword")}
           >
-            <Text style={styles.forgotPasswordText}>Forgot Password?</Text>
-          </TouchableOpacity>
+            <Text style={styles.forgotPasswordText}>Forgot PIN?</Text>
+          </TouchableOpacity> */}
 
           {/* Login Button */}
           <TouchableOpacity
@@ -130,25 +149,12 @@ const Login = ({ navigation }) => {
               {isLoading ? "Signing In..." : "Sign In"}
             </Text>
           </TouchableOpacity>
-
-          {/* Divider */}
-          <View style={styles.dividerContainer}>
-            <View style={styles.dividerLine} />
-            <Text style={styles.dividerText}>OR</Text>
-            <View style={styles.dividerLine} />
-          </View>
-
-          {/* Biometric Login */}
-          <TouchableOpacity style={styles.biometricButton}>
-            <View style={styles.fingerprintIcon} />
-            <Text style={styles.biometricText}>Use Fingerprint</Text>
-          </TouchableOpacity>
         </View>
 
         {/* Footer */}
         <View style={styles.footer}>
           <Text style={styles.footerText}>Don't have an account? </Text>
-          <TouchableOpacity onPress={() => navigation?.navigate("Signup")}>
+          <TouchableOpacity onPress={() => navigation.navigate("Signup")}>
             <Text style={styles.signupText}>Sign Up</Text>
           </TouchableOpacity>
         </View>
@@ -169,68 +175,68 @@ const styles = StyleSheet.create({
   header: {
     alignItems: "center",
     paddingTop: 60,
-    paddingBottom: 40,
+    paddingBottom: 30,
   },
   bankIconContainer: {
     alignItems: "center",
-    marginBottom: 30,
+    marginBottom: 20,
   },
   bankBuilding: {
-    width: 80,
-    height: 60,
+    width: 60,
+    height: 45,
     backgroundColor: "#1e40af",
-    borderRadius: 8,
+    borderRadius: 6,
   },
   bankPillar1: {
     position: "absolute",
-    top: 15,
-    left: 10,
-    width: 8,
-    height: 45,
+    top: 10,
+    left: 8,
+    width: 6,
+    height: 35,
     backgroundColor: "#ffffff",
-    borderRadius: 4,
+    borderRadius: 3,
   },
   bankPillar2: {
     position: "absolute",
-    top: 15,
-    left: 36,
-    width: 8,
-    height: 45,
+    top: 10,
+    left: 27,
+    width: 6,
+    height: 35,
     backgroundColor: "#ffffff",
-    borderRadius: 4,
+    borderRadius: 3,
   },
   bankPillar3: {
     position: "absolute",
-    top: 15,
-    right: 10,
-    width: 8,
-    height: 45,
+    top: 10,
+    right: 8,
+    width: 6,
+    height: 35,
     backgroundColor: "#ffffff",
-    borderRadius: 4,
+    borderRadius: 3,
   },
   bankRoof: {
     position: "absolute",
-    top: -5,
-    width: 90,
-    height: 20,
+    top: -3,
+    width: 68,
+    height: 15,
     backgroundColor: "#374151",
-    borderRadius: 4,
+    borderRadius: 3,
   },
   bankText: {
-    marginTop: 10,
-    fontSize: 12,
+    marginTop: 8,
+    fontSize: 10,
     fontWeight: "bold",
     color: "#1e40af",
-    letterSpacing: 2,
+    letterSpacing: 1.5,
   },
   welcomeText: {
-    fontSize: 32,
+    fontSize: 28,
     fontWeight: "800",
     color: "#1f2937",
-    marginBottom: 8,
+    marginBottom: 6,
   },
   subtitleText: {
-    fontSize: 16,
+    fontSize: 15,
     color: "#6b7280",
     fontWeight: "400",
   },
@@ -239,71 +245,53 @@ const styles = StyleSheet.create({
     paddingTop: 20,
   },
   inputContainer: {
-    marginBottom: 24,
+    marginBottom: 20,
   },
   inputLabel: {
-    fontSize: 16,
+    fontSize: 15,
     fontWeight: "600",
     color: "#374151",
-    marginBottom: 8,
+    marginBottom: 6,
   },
   textInput: {
-    height: 56,
+    height: 52,
     borderWidth: 2,
     borderColor: "#e5e7eb",
-    borderRadius: 12,
-    paddingHorizontal: 16,
-    fontSize: 16,
-    color: "#1f2937",
-    backgroundColor: "#f9fafb",
-  },
-  passwordContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-    borderWidth: 2,
-    borderColor: "#e5e7eb",
-    borderRadius: 12,
-    backgroundColor: "#f9fafb",
-    height: 56,
-  },
-  passwordInput: {
-    flex: 1,
-    paddingHorizontal: 16,
-    fontSize: 16,
-    color: "#1f2937",
-  },
-  eyeButton: {
-    padding: 16,
-  },
-  eyeIcon: {
-    width: 24,
-    height: 24,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  eyeOuter: {
-    width: 20,
-    height: 12,
-    borderWidth: 2,
-    borderColor: "#6b7280",
     borderRadius: 10,
+    paddingHorizontal: 14,
+    fontSize: 15,
+    color: "#1f2937",
+    backgroundColor: "#f9fafb",
   },
-  eyeClosed: {
-    borderTopWidth: 0,
-    borderBottomWidth: 2,
-    height: 2,
-    marginTop: 5,
+  pinSubtext: {
+    fontSize: 12,
+    color: "#6b7280",
+    marginBottom: 12,
   },
-  eyeInner: {
-    position: "absolute",
-    width: 8,
-    height: 8,
-    backgroundColor: "#6b7280",
-    borderRadius: 4,
+  pinContainer: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    paddingHorizontal: 10,
+  },
+  pinInput: {
+    width: 45,
+    height: 52,
+    borderWidth: 2,
+    borderColor: "#e5e7eb",
+    borderRadius: 10,
+    fontSize: 20,
+    fontWeight: "bold",
+    color: "#1f2937",
+    backgroundColor: "#f9fafb",
+    marginHorizontal: 3,
+  },
+  pinInputFilled: {
+    borderColor: "#1e40af",
+    backgroundColor: "#eff6ff",
   },
   forgotPasswordContainer: {
     alignItems: "flex-end",
-    marginBottom: 32,
+    marginBottom: 20,
   },
   forgotPasswordText: {
     fontSize: 14,
@@ -311,18 +299,15 @@ const styles = StyleSheet.create({
     fontWeight: "600",
   },
   loginButton: {
-    height: 56,
+    height: 52,
     backgroundColor: "#1e40af",
-    borderRadius: 12,
+    borderRadius: 10,
     justifyContent: "center",
     alignItems: "center",
-    marginBottom: 24,
+    marginBottom: 20,
     elevation: 3,
     shadowColor: "#1e40af",
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
+    shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.25,
     shadowRadius: 3.84,
   },
@@ -330,60 +315,22 @@ const styles = StyleSheet.create({
     backgroundColor: "#9ca3af",
   },
   loginButtonText: {
-    fontSize: 18,
+    fontSize: 16,
     fontWeight: "700",
     color: "#ffffff",
-  },
-  dividerContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-    marginVertical: 24,
-  },
-  dividerLine: {
-    flex: 1,
-    height: 1,
-    backgroundColor: "#e5e7eb",
-  },
-  dividerText: {
-    marginHorizontal: 16,
-    fontSize: 14,
-    color: "#6b7280",
-    fontWeight: "500",
-  },
-  biometricButton: {
-    height: 56,
-    borderWidth: 2,
-    borderColor: "#1e40af",
-    borderRadius: 12,
-    flexDirection: "row",
-    justifyContent: "center",
-    alignItems: "center",
-    backgroundColor: "#ffffff",
-  },
-  fingerprintIcon: {
-    width: 24,
-    height: 24,
-    backgroundColor: "#1e40af",
-    borderRadius: 12,
-    marginRight: 12,
-  },
-  biometricText: {
-    fontSize: 16,
-    fontWeight: "600",
-    color: "#1e40af",
   },
   footer: {
     flexDirection: "row",
     justifyContent: "center",
     alignItems: "center",
-    paddingVertical: 32,
+    paddingVertical: 24,
   },
   footerText: {
-    fontSize: 16,
+    fontSize: 15,
     color: "#6b7280",
   },
   signupText: {
-    fontSize: 16,
+    fontSize: 15,
     fontWeight: "600",
     color: "#1e40af",
   },

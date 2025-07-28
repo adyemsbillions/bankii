@@ -10,8 +10,8 @@ import {
 } from "react-native";
 import { NavigationContainer } from "@react-navigation/native";
 import { createStackNavigator } from "@react-navigation/stack";
-import Signup from "./signup"; // Import your Signup component
-
+import Login from "./Login";
+import Signup from "./Signup"; // Ensure this file exists
 const { width } = Dimensions.get("window");
 
 const OnboardingScreen = ({ navigation }) => {
@@ -74,7 +74,7 @@ const OnboardingScreen = ({ navigation }) => {
 
   const handleNext = () => {
     if (currentIndex === onboardingData.length - 1) {
-      navigation.navigate("Signup");
+      navigation.navigate("Login");
     } else {
       const nextIndex = (currentIndex + 1) % onboardingData.length;
       setCurrentIndex(nextIndex);
@@ -170,8 +170,8 @@ const OnboardingScreen = ({ navigation }) => {
       />
       <View
         style={[
-          styles.dot,
           { backgroundColor: "#10b981", bottom: 30, right: 50 },
+          styles.dot,
         ]}
       />
       <View style={styles.paymentsBg} />
@@ -682,6 +682,11 @@ const App = () => (
       <Stack.Screen
         name="Onboarding"
         component={OnboardingScreen}
+        options={{ headerShown: false }}
+      />
+      <Stack.Screen
+        name="Login"
+        component={Login}
         options={{ headerShown: false }}
       />
       <Stack.Screen
