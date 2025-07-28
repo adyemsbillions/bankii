@@ -97,7 +97,7 @@ const Signup = ({ navigation }) => {
       <View style={styles.bankPillar2} />
       <View style={styles.bankPillar3} />
       <View style={styles.bankRoof} />
-      <Text style={styles.bankText}>BANK</Text>
+      <Text style={styles.bankText}>ZAMANIPAY</Text>
     </View>
   );
 

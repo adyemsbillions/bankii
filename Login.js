@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import {
   View,
   Text,
@@ -16,18 +16,38 @@ const { width, height } = Dimensions.get("window");
 
 const Login = ({ navigation }) => {
   const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [showPassword, setShowPassword] = useState(false);
+  const [pin, setPin] = useState(["", "", "", "", ""]);
+  const [showPin, setShowPin] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const pinRefs = useRef(pin.map(() => React.createRef()));
+
+  const handlePinChange = (text, index) => {
+    if (/^[0-9]?$/.test(text)) {
+      const newPin = [...pin];
+      newPin[index] = text;
+      setPin(newPin);
+
+      if (text && index < 4) {
+        pinRefs.current[index + 1].current.focus();
+      } else if (!text && index > 0) {
+        pinRefs.current[index - 1].current.focus();
+      }
+    }
+  };
+
+  const handlePinPaste = (text) => {
+    if (/^\d{5}$/.test(text)) {
+      setPin(text.split(""));
+    }
+  };
 
   const handleLogin = async () => {
-    if (!email || !password) {
+    if (!email || pin.some((digit) => digit === "")) {
       Alert.alert("Error", "Please fill in all fields");
       return;
     }
 
     setIsLoading(true);
-    // Simulate API call
     setTimeout(() => {
       setIsLoading(false);
       Alert.alert("Success", "Login successful!");
@@ -49,7 +69,7 @@ const Login = ({ navigation }) => {
       <View style={styles.bankPillar2} />
       <View style={styles.bankPillar3} />
       <View style={styles.bankRoof} />
-      <Text style={styles.bankText}>BANK</Text>
+      <Text style={styles.bankText}>ZAMANIPAY</Text>
     </View>
   );
 
@@ -85,25 +105,31 @@ const Login = ({ navigation }) => {
               autoCorrect={false}
             />
           </View>
-          {/* Password Input */}
+          {/* PIN Input */}
           <View style={styles.inputContainer}>
-            <Text style={styles.inputLabel}>Password</Text>
-            <View style={styles.passwordContainer}>
-              <TextInput
-                style={styles.passwordInput}
-                placeholder="Enter your password"
-                placeholderTextColor="#9ca3af"
-                value={password}
-                onChangeText={setPassword}
-                secureTextEntry={!showPassword}
-                autoCapitalize="none"
-                autoCorrect={false}
-              />
+            <Text style={styles.inputLabel}>PIN</Text>
+            <View style={styles.pinContainer}>
+              {pin.map((digit, index) => (
+                <TextInput
+                  key={index}
+                  ref={pinRefs.current[index]}
+                  style={styles.pinInput}
+                  value={digit}
+                  onChangeText={(text) => handlePinChange(text, index)}
+                  onPaste={(e) => handlePinPaste(e.nativeEvent.text)}
+                  keyboardType="numeric"
+                  maxLength={1}
+                  secureTextEntry={!showPin}
+                  autoCapitalize="none"
+                  autoCorrect={false}
+                  textAlign="center"
+                />
+              ))}
               <TouchableOpacity
                 style={styles.eyeButton}
-                onPress={() => setShowPassword(!showPassword)}
+                onPress={() => setShowPin(!showPin)}
               >
-                <EyeIcon show={showPassword} />
+                <EyeIcon show={showPin} />
               </TouchableOpacity>
             </View>
           </View>
@@ -112,7 +138,7 @@ const Login = ({ navigation }) => {
             style={styles.forgotPasswordContainer}
             onPress={() => navigation.navigate("ForgotPassword")}
           >
-            <Text style={styles.forgotPasswordText}>Forgot Password?</Text>
+            <Text style={styles.forgotPasswordText}>Forgot PIN?</Text>
           </TouchableOpacity>
           {/* Login Button */}
           <TouchableOpacity
@@ -133,7 +159,7 @@ const Login = ({ navigation }) => {
             <Text style={styles.dividerText}>OR</Text>
             <View style={styles.dividerLine} />
           </View>
-
+          {/* Biometric Login */}
           <TouchableOpacity style={styles.biometricButton}>
             <View style={styles.fingerprintIcon} />
             <Text style={styles.biometricText}>Use Fingerprint</Text>
@@ -252,20 +278,22 @@ const styles = StyleSheet.create({
     color: "#1f2937",
     backgroundColor: "#f9fafb",
   },
-  passwordContainer: {
+  pinContainer: {
     flexDirection: "row",
+    justifyContent: "space-between",
     alignItems: "center",
+    height: 56,
+  },
+  pinInput: {
+    width: 48,
+    height: 56,
     borderWidth: 2,
     borderColor: "#e5e7eb",
     borderRadius: 12,
     backgroundColor: "#f9fafb",
-    height: 56,
-  },
-  passwordInput: {
-    flex: 1,
-    paddingHorizontal: 16,
-    fontSize: 16,
+    fontSize: 24,
     color: "#1f2937",
+    textAlign: "center",
   },
   eyeButton: {
     padding: 16,
