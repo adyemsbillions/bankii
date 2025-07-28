@@ -11,7 +11,9 @@ import {
 import { NavigationContainer } from "@react-navigation/native";
 import { createStackNavigator } from "@react-navigation/stack";
 import Login from "./Login";
-import Signup from "./Signup"; // Ensure this file exists
+import Signup from "./Signup";
+import ForgotPassword from "./forget_password"; // Added import for ForgotPassword
+
 const { width } = Dimensions.get("window");
 
 const OnboardingScreen = ({ navigation }) => {
@@ -692,6 +694,11 @@ const App = () => (
       <Stack.Screen
         name="Signup"
         component={Signup}
+        options={{ headerShown: false }}
+      />
+      <Stack.Screen
+        name="ForgotPassword"
+        component={ForgotPassword}
         options={{ headerShown: false }}
       />
     </Stack.Navigator>
